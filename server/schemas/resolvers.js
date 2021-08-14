@@ -15,15 +15,9 @@ const resolvers = {
 
       throw new AuthenticationError('Not logged in');
     },
-
+  },
     Mutation: {
      
-      addUser: async (parent, args) => {
-        const user = await User.create(args);
-        const token = signToken(user);
-  
-        return { token, user };
-      },
       login: async (parent, { email, password }) => {
         const user = await User.findOne({ email });
       
@@ -38,6 +32,12 @@ const resolvers = {
         }
         
         const token = signToken(user);
+        return { token, user };
+      },
+      addUser: async (parent, args) => {
+        const user = await User.create(args);
+        const token = signToken(user);
+  
         return { token, user };
       },
       // saveBook: async(parent, args, context) => {
@@ -56,11 +56,7 @@ const resolvers = {
 
       //   throw new AuthenticationError('You need to be logged in!');
       // },
-      // removeBook: async(parent, args, context) => {
-      //   if (context.user) {
-      //     const deleteBook = await.
-      //   }
-      // }
+      
 
       // check saveBook and write removeBook
 
@@ -68,7 +64,8 @@ const resolvers = {
         if (context.user) {
           const updatedUser = await User.findOneAndUpdate(
             { _id: context.user._id },
-            { $push: { savedBooks: { bookData, username: context.user.username } } },
+            // { $push: { savedBooks: { bookData, username: context.user.username } } },
+            { $push: { savedBooks:  bookData  } },
             { new: true, runValidators: true }
           );
       
@@ -77,21 +74,21 @@ const resolvers = {
       
         throw new AuthenticationError('You need to be logged in!');
       },
-      removeBook: async (parent, { bookID }, context) => {
+      removeBook: async (parent, { bookId }, context) => {
         if (context.user) {
-          const deleteBook = await User.findOneAndUpdate(
+          const modifiedUser = await User.findOneAndUpdate(
             { _id: context.user._id },
-            { $pull: { savedBooks: { bookID, username: context.user.username } } },
+            // { $pull: { savedBooks: { bookID, username: context.user.username } } },
+            { $pull: { savedBooks: { bookId } } },
             { new: true, runValidators: true }
           );
       
-          return deleteBook;
+          return modifiedUser;
         }
       
         throw new AuthenticationError('You need to be logged in!');
-      },
+      }
     }
-  }
 };
 
 module.exports = resolvers;
